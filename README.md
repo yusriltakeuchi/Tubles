@@ -7,6 +7,12 @@ Tubles is a simple applications to provide any tubles in
 - flutter packages get
 - flutter run
 
+# Billing
+You must enable some API in google cloud to use this features
+- Google Maps for Android/iOS
+- Place API
+- Direction API
+
 ## Setup
 Please fill API KEY with your Google Cloud APIKEY
 1. android/app/src/main/AndroidManifest.xml
