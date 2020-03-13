@@ -43,7 +43,7 @@ class HomeBody extends StatelessWidget {
           height: MediaQuery.of(context).size.height,
           child: GoogleMap(
             myLocationButtonEnabled: false,
-            myLocationEnabled: mapProv.myLocationEnable,
+            myLocationEnabled: false,
             compassEnabled: false,
             tiltGesturesEnabled: false,
             markers: mapProv.markers,
@@ -184,7 +184,7 @@ class TublesItem extends StatelessWidget {
             var tubles = mapProv.tublesList[index];
 
             return InkWell(
-              onTap: () => mapProv.dialogNavigate(context),
+              onTap: () => mapProv.dialogNavigate(context, tubles),
               child: Container(
                 width: MediaQuery.of(context).size.width,
                 margin: EdgeInsets.only(left: 20, right: 20, bottom: 40),

@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_map_polyline/google_map_polyline.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -90,10 +91,16 @@ class MapProvider extends ChangeNotifier {
   bool _isNavigate = false;
   bool get isNavigate => _isNavigate;
 
-  //Property to show location blue dots
-  bool _myLocationEnable = false;
-  bool get myLocationEnable => _myLocationEnable;
+  //Property to mapStyle
+  String _mapStyle;
+  String get mapStyle => _mapStyle;
 
+  //Property polylines color
+  Color _polyLineColor = Colors.amber;
+
+  //Property location services
+  Location location = new Location();
+  StreamSubscription<LocationData> locationSubscription;
 
   //------------------------//
   //   FUNCTION SECTIONS   //
@@ -117,9 +124,26 @@ class MapProvider extends ChangeNotifier {
 
   //Function to get current locations
   void initLocation() async {
-    var locData = await Location().getLocation();
+    var locData = await location.getLocation();
     _sourceLocation = LatLng(locData.latitude, locData.longitude);
+    
     notifyListeners();
+  }
+
+  //Function to listening user location changed
+  void listeningLocation() {
+    //Adding location listener
+    locationSubscription = location.onLocationChanged().listen((LocationData data)
+    {
+      _sourceLocation = LatLng(data.latitude, data.longitude);
+      print(data.latitude.toString());
+      updateMyLocationMaker();
+    });
+  }
+
+  //Function to stop listening location changed
+  void stopListeningLocation() {
+    locationSubscription.cancel();
   }
 
   //Function to change camera position
@@ -134,8 +158,14 @@ class MapProvider extends ChangeNotifier {
   //Function to handle when maps created
   void onMapCreated(GoogleMapController controller) async {
     
+    //Loading map style
+    _mapStyle = await rootBundle.loadString(Config.mapStyleFile);
+
     _completer.complete(controller);
     _controller = controller;
+
+    //Set style to map
+    _controller.setMapStyle(_mapStyle);
     
     await setIcons();
     setMapPins(sourceLocation, tublesList);
@@ -146,6 +176,26 @@ class MapProvider extends ChangeNotifier {
 
   //Function to set marker into my locations
   void setMyLocationMarker() {
+    _markers.add(Marker(
+      markerId: MarkerId("sourcePin"),
+      position: sourceLocation,
+      icon: _sourceIcon
+    ));
+
+    notifyListeners();
+  }
+
+  //Function to set marker into my locations
+  void updateMyLocationMaker() {
+    //Change camera position
+    if (_controller != null) {
+      changeCameraPosition(sourceLocation);
+    }
+
+    //Remove current marker
+    _markers.removeWhere((m) => m.markerId.value == "sourcePin");
+
+    //Adding new marker
     _markers.add(Marker(
       markerId: MarkerId("sourcePin"),
       position: sourceLocation,
@@ -224,9 +274,9 @@ class MapProvider extends ChangeNotifier {
 
     Polyline poly = Polyline(
         polylineId: PolylineId("Polylines"),
-        color: Colors.black54,
+        color: _polyLineColor,
         points: _polylineCoordinates,
-        width: 7
+        width: 5
     );
 
     _polylines.add(poly);
@@ -242,7 +292,11 @@ class MapProvider extends ChangeNotifier {
   }
 
   //Function to navigate into tubles destination
-  void navigate() {
+  void navigate({TublesModel tubles}) async {
+    if (tubles != null) {
+      await setSelected(tubles);
+    }
+
     //Removing previous marker and polylines
     _markers.clear();
     clearPolylines();
@@ -254,9 +308,6 @@ class MapProvider extends ChangeNotifier {
       icon: _destinationIcon,
     ));
 
-    //Showing my location blue dots
-    _myLocationEnable = true;
-
     //Set my location marker
     setMyLocationMarker();
 
@@ -265,6 +316,9 @@ class MapProvider extends ChangeNotifier {
     
     //set navigate status
     _isNavigate = true;
+
+    //Enable location listener
+    listeningLocation();
 
     notifyListeners();
   }
@@ -275,14 +329,15 @@ class MapProvider extends ChangeNotifier {
     _markers.clear();
     clearPolylines();
     setMapPins(sourceLocation, tublesList);
-    //Hiding my location blue dots
-    _myLocationEnable = false;
+
+    //Stop listening location
+    stopListeningLocation();
 
     notifyListeners();
   }
 
   //Dialog to show if we want to go to destination or not
-  void dialogNavigate(BuildContext context) {
+  void dialogNavigate(BuildContext context, TublesModel tubles) {
     DialogUtils.showDialogChoose(
       context, 
       "Navigasi Tubles", 
@@ -291,7 +346,7 @@ class MapProvider extends ChangeNotifier {
         //On Yes
         Navigator.pop(context);
         changeCameraPosition(sourceLocation);
-        navigate();
+        navigate(tubles: tubles);
       }, 
       () {
         //On No

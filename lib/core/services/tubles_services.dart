@@ -30,6 +30,11 @@ class TublesServices {
         description: "Menerima pelayanan spesial ban bocor, ganti karet ban, pelek, dan isi angin",
         location: LatLng(-6.161376903822747, 106.82165622711183)
       ),
+      TublesModel(
+        title: "Tambal Ban Kuningan",
+        description: "Respon cepat dan pelayanan terbaik",
+        location: LatLng(-6.232776052438292, 106.82560443878174)
+      ),
     ];
   }
 }
