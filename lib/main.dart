@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tubles/core/viewmodels/maps_provider.dart';
+import 'package:tubles/core/viewmodels/page_provider.dart';
 import 'package:tubles/ui/screens/home/home_screen.dart';
 
 void main() => runApp(MyApp());
@@ -12,7 +13,10 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(
           create: (context) => MapProvider(),
-        )
+        ),
+        ChangeNotifierProvider(
+          create: (context) => PageProvider(),
+        ),
       ],
       child: MaterialApp(
         title: "Tubles",

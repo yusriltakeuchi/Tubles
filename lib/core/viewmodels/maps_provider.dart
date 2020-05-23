@@ -1,17 +1,23 @@
 
 
 import 'dart:async';
+import 'dart:math';
+import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_map_polyline/google_map_polyline.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'package:provider/provider.dart';
 import 'package:tubles/core/config/config.dart';
 import 'package:tubles/core/models/tubles_model.dart';
 import 'package:tubles/core/services/tubles_services.dart';
 import 'package:tubles/core/utils/dialog_utils.dart';
+import 'package:tubles/core/viewmodels/page_provider.dart';
 
 class MapProvider extends ChangeNotifier {
 
@@ -75,14 +81,6 @@ class MapProvider extends ChangeNotifier {
   String _googleAPIKey = "<YOUR API KEY>";
   String get apiKey => _googleAPIKey;
 
-  //Property custom icon to my location
-  BitmapDescriptor _sourceIcon;
-  BitmapDescriptor get sourceIcon => _sourceIcon;
-
-  //Property custom icon to destination location
-  BitmapDescriptor _destinationIcon;
-  BitmapDescriptor get destinationIcon => _destinationIcon;
-
   //Property to handle selected tubles
   TublesModel _tublesSelected;
   TublesModel get tublesSelected => _tublesSelected;
@@ -102,12 +100,24 @@ class MapProvider extends ChangeNotifier {
   Location location = new Location();
   StreamSubscription<LocationData> locationSubscription;
 
+  //Property to save buildcontext
+  BuildContext _context;
+  BuildContext get context => _context;
+
+  ///Custom key for custom marker
+  final markerKey = GlobalKey();
+  final myLocationKey = GlobalKey();
+
+  /// Property to save distance in navigate mode
+  String _distance = "0 meter";
+  String get distance => _distance;
+
   //------------------------//
   //   FUNCTION SECTIONS   //
   //------------------------//
 
   //Function to initialize camera
-  void initCamera() async {
+  void initCamera(BuildContext context) async {
     
     //Get current locations
     await initLocation();
@@ -119,6 +129,9 @@ class MapProvider extends ChangeNotifier {
       tilt: cameraTilt,
       target: sourceLocation
     );
+
+    //Set context
+    _context = context;
     notifyListeners();
   }
 
@@ -134,16 +147,25 @@ class MapProvider extends ChangeNotifier {
   void listeningLocation() {
     //Adding location listener
     locationSubscription = location.onLocationChanged().listen((LocationData data)
-    {
+    async {
       _sourceLocation = LatLng(data.latitude, data.longitude);
       print(data.latitude.toString());
       updateMyLocationMaker();
+      
+      /// Get distance
+      getDistance(LatLng(data.latitude, data.longitude));
     });
   }
 
   //Function to stop listening location changed
   void stopListeningLocation() {
     locationSubscription.cancel();
+  }
+
+  /// Function to get distance between two locations
+  void getDistance(LatLng myLocation) async {
+    _distance = await calculateDistance(myLocation, tublesSelected.location);
+    notifyListeners();
   }
 
   //Function to change camera position
@@ -167,7 +189,6 @@ class MapProvider extends ChangeNotifier {
     //Set style to map
     _controller.setMapStyle(_mapStyle);
     
-    await setIcons();
     setMapPins(sourceLocation, tublesList);
 
     notifyListeners();
@@ -175,18 +196,22 @@ class MapProvider extends ChangeNotifier {
 
 
   //Function to set marker into my locations
-  void setMyLocationMarker() {
+  void setMyLocationMarker() async {
+    ///Create marker point
+    Uint8List markerIcon = await getUint8List(myLocationKey);
+    notifyListeners();
+
     _markers.add(Marker(
       markerId: MarkerId("sourcePin"),
       position: sourceLocation,
-      icon: _sourceIcon
+      icon: BitmapDescriptor.fromBytes(markerIcon)
     ));
 
     notifyListeners();
   }
 
   //Function to set marker into my locations
-  void updateMyLocationMaker() {
+  void updateMyLocationMaker() async {
     //Change camera position
     if (_controller != null) {
       changeCameraPosition(sourceLocation);
@@ -195,45 +220,45 @@ class MapProvider extends ChangeNotifier {
     //Remove current marker
     _markers.removeWhere((m) => m.markerId.value == "sourcePin");
 
+    ///Create marker point
+    Uint8List markerIcon = await getUint8List(myLocationKey);
+    notifyListeners();
     //Adding new marker
     _markers.add(Marker(
       markerId: MarkerId("sourcePin"),
       position: sourceLocation,
-      icon: _sourceIcon
+      icon: BitmapDescriptor.fromBytes(markerIcon)
     ));
 
     notifyListeners();
   }
 
   //Function to pin my location and tubles list
-  void setMapPins(LatLng sourceLocation, List<TublesModel> destinationList) {
+  void setMapPins(LatLng sourceLocation, List<TublesModel> destinationList) async {
     //Set my location marker
     setMyLocationMarker();
 
-    destinationList.forEach((TublesModel data) {
+    for (int i=0; i<destinationList.length; i++) {
+      var data = destinationList[i];
+
+      _tublesSelected = await data;
+      await Future.delayed(Duration(milliseconds: 100));
+      
+      ///Create marker point
+      Uint8List markerIcon = await getUint8List(markerKey);
+      notifyListeners();
+      
       _markers.add(Marker(
         markerId: MarkerId(data.title),
         position: data.location,
-        icon: _destinationIcon,
+        icon: BitmapDescriptor.fromBytes(markerIcon),
         
         onTap: () => setSelected(data)
       ));
-    });
+    }
 
     notifyListeners();
   }
-
-  //Function to set custom icon marker
-  void setIcons() async {
-    _sourceIcon = await BitmapDescriptor.fromAssetImage(
-      ImageConfiguration(devicePixelRatio: 2.5), "${Config.imageIcon}/mylocation.png");
-
-    _destinationIcon = await BitmapDescriptor.fromAssetImage(
-      ImageConfiguration(devicePixelRatio: 2.5), "${Config.imageIcon}/destination.png");
-
-    notifyListeners();
-  }
-
 
   //Function to set selected tubles
   void setSelected(TublesModel data) async {
@@ -243,6 +268,10 @@ class MapProvider extends ChangeNotifier {
     await clearPolylines();
     //Set polyline ketika klik marker
     await setPolyLines(data.location);
+
+    /// Change Pageview position
+    int index = tublesList.indexOf(data);
+    Provider.of<PageProvider>(context, listen: false).navigatePageTo(index);
 
     notifyListeners();
   }
@@ -301,11 +330,18 @@ class MapProvider extends ChangeNotifier {
     _markers.clear();
     clearPolylines();
 
+    _tublesSelected = await tubles;
+    await Future.delayed(Duration(milliseconds: 100));
+    
+    ///Create marker point
+    Uint8List markerIcon = await getUint8List(markerKey);
+    notifyListeners();
+
     //Adding new marker destination
     _markers.add(Marker(
       markerId: MarkerId(tublesSelected.title),
       position: tublesSelected.location,
-      icon: _destinationIcon,
+      icon: BitmapDescriptor.fromBytes(markerIcon),
     ));
 
     //Set my location marker
@@ -316,6 +352,9 @@ class MapProvider extends ChangeNotifier {
     
     //set navigate status
     _isNavigate = true;
+
+    /// Get Distance between two locations
+    getDistance(sourceLocation);
 
     //Enable location listener
     listeningLocation();
@@ -328,10 +367,14 @@ class MapProvider extends ChangeNotifier {
     _isNavigate = false;
     _markers.clear();
     clearPolylines();
+    
     setMapPins(sourceLocation, tublesList);
 
     //Stop listening location
     stopListeningLocation();
+
+    /// Reset page item
+    Provider.of<PageProvider>(context, listen: false).resetPageView();
 
     notifyListeners();
   }
@@ -370,6 +413,32 @@ class MapProvider extends ChangeNotifier {
         //On No
         Navigator.pop(context);
       });
+  }
+
+  ///Converting Widget to PNG
+  Future<Uint8List> getUint8List(GlobalKey widgetKey) async {
+    RenderRepaintBoundary boundary =
+    widgetKey.currentContext.findRenderObject();
+    var image = await boundary.toImage(pixelRatio: 2.0);
+    ByteData byteData = await image.toByteData(format: ImageByteFormat.png);
+    return byteData.buffer.asUint8List();
+  }
+
+
+  ///Calculate distance between two location
+  Future<String> calculateDistance(LatLng firstLocation, LatLng secondLocation) async {
+    var p = 0.017453292519943295;
+    var c = cos;
+    var a = 0.5 - c((secondLocation.latitude - firstLocation.latitude) * p)/2 + 
+          c(firstLocation.latitude * p) * c(secondLocation.latitude * p) * 
+          (1 - c((secondLocation.longitude - firstLocation.longitude) * p))/2;
+    var distance = 12742 * asin(sqrt(a));
+
+    if (distance < 1) {
+      return (double.parse(distance.toStringAsFixed(3)) * 1000).toString().split(".")[0] + " meter";
+    } else {
+      return double.parse(distance.toStringAsFixed(2)).toString() + " km";
+    }
   }
 
 }
