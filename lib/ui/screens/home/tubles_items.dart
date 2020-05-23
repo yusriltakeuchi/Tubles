@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:after_layout/after_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tubles/core/config/config.dart';
@@ -13,7 +12,7 @@ class TublesItems extends StatefulWidget {
   _TublesItemsState createState() => _TublesItemsState();
 }
 
-class _TublesItemsState extends State<TublesItems>  with AfterLayoutMixin<TublesItems>  {
+class _TublesItemsState extends State<TublesItems> {
   @override
   Widget build(BuildContext context) {
     return Consumer<PageProvider>(
@@ -30,7 +29,7 @@ class _TublesItemsState extends State<TublesItems>  with AfterLayoutMixin<Tubles
           builder: (context, mapProv, _) {
 
             return AnimatedPositioned(
-              duration: Duration(seconds: 6),
+              duration: Duration(seconds: 4),
               curve: Curves.elasticInOut,
               bottom: pageProv.bottomPosition,
               left: 0,
@@ -141,8 +140,4 @@ class _TublesItemsState extends State<TublesItems>  with AfterLayoutMixin<Tubles
     );
   }
 
-  @override
-  void afterFirstLayout(BuildContext context) {
-    Provider.of<PageProvider>(context, listen: false).updateBottomPosition(30);
-  }
 }

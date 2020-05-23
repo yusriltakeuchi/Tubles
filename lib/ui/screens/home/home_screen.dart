@@ -4,6 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:tubles/core/config/config.dart';
 import 'package:tubles/core/viewmodels/maps_provider.dart';
+import 'package:tubles/core/viewmodels/page_provider.dart';
 import 'package:tubles/ui/constant/constant.dart';
 import 'package:tubles/ui/screens/home/tubles_items.dart';
 import 'package:tubles/ui/widgets/clip_triangle.dart';
@@ -33,6 +34,8 @@ class HomeBody extends StatelessWidget {
     final mapProv = Provider.of<MapProvider>(context);
     if (mapProv.cameraPosition == null) {
       mapProv.initCamera(context);
+    } else {
+      Provider.of<PageProvider>(context, listen: false).updateBottomPosition(30);
     }
 
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
@@ -95,7 +98,7 @@ class HomeBody extends StatelessWidget {
           ),
         ) : Container(),
 
-        SafeArea(
+        mapProv.cameraPosition != null ? SafeArea(
           child: Align(
             alignment: Alignment.topRight,
             child: Padding(
@@ -114,7 +117,7 @@ class HomeBody extends StatelessWidget {
               )
             ),
           ),
-        ),
+        ) : SizedBox(),
       ],
     );
   }

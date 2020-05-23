@@ -75,8 +75,8 @@ class PageProvider extends ChangeNotifier {
   }
 
   /// Function to update bottom Position
-  void updateBottomPosition(double position) {
-    _bottomPosition = position;
+  void updateBottomPosition(double position) async {
+    _bottomPosition = await position;
     notifyListeners();
   }
 

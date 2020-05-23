@@ -28,7 +28,6 @@ dependencies:
   flutter_polyline_points: ^0.1.0
   google_map_polyline: ^0.2.0+1
   location: ^2.3.5
-  after_layout: ^1.0.7+2
 
 dev_dependencies:
   flutter_test:

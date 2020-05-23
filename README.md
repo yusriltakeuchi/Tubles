@@ -14,6 +14,7 @@ Tubles is a simple applications to provide any tubles place
 - Direction Route to Tubles
 - Distance Calculations
 - Location Subscribtion Listener
+- Custom Map Style Terrain
 
 ## Installing
 - git clone https://github.com/yusriltakeuchi/Tubles.git
