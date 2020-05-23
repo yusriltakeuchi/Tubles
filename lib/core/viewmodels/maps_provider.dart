@@ -148,18 +148,29 @@ class MapProvider extends ChangeNotifier {
     //Adding location listener
     locationSubscription = location.onLocationChanged().listen((LocationData data)
     async {
-      _sourceLocation = LatLng(data.latitude, data.longitude);
-      print(data.latitude.toString());
-      updateMyLocationMaker();
+
+      var locData = LatLng(data.latitude, data.longitude);
+
+      /// Set current location
+      setMyLocation(locData);
       
       /// Get distance
-      getDistance(LatLng(data.latitude, data.longitude));
+      getDistance(locData);
     });
   }
 
   //Function to stop listening location changed
   void stopListeningLocation() {
     locationSubscription.cancel();
+  }
+
+  /// Function to set current location
+  void setMyLocation(LatLng loc) {
+    _sourceLocation = loc;
+    print(loc.latitude.toString());
+
+    updateMyLocationMaker();
+    notifyListeners();
   }
 
   /// Function to get distance between two locations
@@ -375,6 +386,10 @@ class MapProvider extends ChangeNotifier {
 
     /// Reset page item
     Provider.of<PageProvider>(context, listen: false).resetPageView();
+
+    /// Reinitialize locations
+    initLocation();
+    updateMyLocationMaker();
 
     notifyListeners();
   }
