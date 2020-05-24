@@ -3,7 +3,8 @@ Tubles is a simple applications to provide any tubles place
     in google maps and we as the user can navigate into the selected tubles location.
 
 <p>
-<img  src="https://i.ibb.co/v4yNgjc/Screenshot-2020-05-23-15-48-14-357-com-yurani-tubles.jpg"  width=265/>
+<img  src="https://i.ibb.co/MhxgsDL/Screenshot-2020-05-24-23-22-57-390-com-yurani-tubles.jpg"  width=265/>
+<img  src="https://i.ibb.co/HVc3wxm/Screenshot-2020-05-24-22-05-22-593-com-yurani-tubles.jpg"  width=265/>
 <img  src="https://i.ibb.co/rGyDxwK/Screenshot-2020-05-23-15-42-49-418-com-yurani-tubles.jpg"  width=265/>
 </p>
 
@@ -45,3 +46,18 @@ GMSServices.provideAPIKey("YOUR API KEY")
   String _googleAPIKey = "<YOUR API KEY>";
   String get apiKey => _googleAPIKey;
 ```
+
+# CHANGELOG
+
+v1.0.2
+- Adding Search Tubles
+- Refactoring Code
+- Fixing Camera Zoom & Bearing
+
+v1.0.1
+- Adding Custom Marker
+- Distance Calculations
+- Animation Item Slide
+
+v1.0.0
+- First Release

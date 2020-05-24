@@ -55,7 +55,7 @@ class PageProvider extends ChangeNotifier {
   void changeCurrentPage(int position, BuildContext context) {
     _currentPage = position;
     final mapProv = Provider.of<MapProvider>(context, listen: false);
-    mapProv.changeCameraPosition(mapProv.tublesList[position].location);
+    mapProv.changeCameraPosition(mapProv.tublesList[position].location, useBearing: true);
     mapProv.setSelected(mapProv.tublesList[position]);
     notifyListeners();
   }

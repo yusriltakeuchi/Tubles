@@ -8,7 +8,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_map_polyline/google_map_polyline.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
@@ -48,6 +47,12 @@ class MapProvider extends ChangeNotifier {
   //Property tubles list
   List<TublesModel> _tublesList = TublesServices.getTubles();
   List<TublesModel> get tublesList => _tublesList;
+
+  //Property tubles item filter
+  //this variable will use when you activate
+  //the search features
+  List<TublesModel> _filteredTubles;
+  List<TublesModel> get filteredTubles => _filteredTubles;
 
   //Property Google Map Controller completer
   Completer<GoogleMapController> _completer = Completer();
@@ -139,7 +144,6 @@ class MapProvider extends ChangeNotifier {
   void initLocation() async {
     var locData = await location.getLocation();
     _sourceLocation = LatLng(locData.latitude, locData.longitude);
-    
     notifyListeners();
   }
 
@@ -169,7 +173,7 @@ class MapProvider extends ChangeNotifier {
     _sourceLocation = loc;
     print(loc.latitude.toString());
 
-    updateMyLocationMaker();
+    updateMyLocationMaker(true, false);
     notifyListeners();
   }
 
@@ -180,10 +184,16 @@ class MapProvider extends ChangeNotifier {
   }
 
   //Function to change camera position
-  void changeCameraPosition(LatLng location) {
-    _controller.animateCamera(CameraUpdate.newLatLng(
-      LatLng(location.latitude, location.longitude)
-    ));
+  void changeCameraPosition(LatLng location, {bool useBearing = false, bool customZoom = false}) {
+    // _controller.animateCamera(CameraUpdate.newLatLngZoom(
+    //   LatLng(location.latitude, location.longitude), cameraZoom));
+    _controller.animateCamera(CameraUpdate.newCameraPosition(
+      CameraPosition(
+        target: LatLng(location.latitude, location.longitude),
+        bearing: useBearing == true ? cameraBearing : 0,
+        zoom: customZoom == true ? 18 : cameraZoom
+      ))
+    );
 
     notifyListeners();
   }
@@ -222,10 +232,10 @@ class MapProvider extends ChangeNotifier {
   }
 
   //Function to set marker into my locations
-  void updateMyLocationMaker() async {
+  void updateMyLocationMaker(bool customZoom, bool useBearing) async {
     //Change camera position
     if (_controller != null) {
-      changeCameraPosition(sourceLocation);
+      changeCameraPosition(sourceLocation, customZoom: customZoom, useBearing: useBearing);
     }
 
     //Remove current marker
@@ -271,18 +281,47 @@ class MapProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Function to search tubles location by keyword
+  void searchTubles(String keyword) async {
+    /// Filter search by title
+    if (keyword.length > 0) {
+      _filteredTubles = tublesList.where((element) => element.title.toLowerCase().contains(keyword.toLowerCase())).toList();
+    } else {
+      _filteredTubles = null;
+    }
+    notifyListeners();
+  }
+
+  /// Function to handle search click event
+  void onItemSearchClick(TublesModel tubles) async {
+    /// Set filtered to null
+    _filteredTubles = null;
+    notifyListeners();
+
+    /// Set selected tubles
+    changeCameraPosition(sourceLocation, customZoom: true);
+    await setSelected(tubles, fromSearch: true);
+
+    navigate();
+  }
+
   //Function to set selected tubles
-  void setSelected(TublesModel data) async {
+  void setSelected(TublesModel data, {bool fromSearch = false}) async {
     _tublesSelected = data;
 
     //Remove previous polylines
     await clearPolylines();
-    //Set polyline ketika klik marker
-    await setPolyLines(data.location);
 
-    /// Change Pageview position
-    int index = tublesList.indexOf(data);
-    Provider.of<PageProvider>(context, listen: false).navigatePageTo(index);
+    if (fromSearch == false) {
+      //Set polyline ketika klik marker
+      await setPolyLines(data.location);
+    }
+
+    if (fromSearch == false) {
+      /// Change Pageview position
+      int index = tublesList.indexOf(data);
+      Provider.of<PageProvider>(context, listen: false).navigatePageTo(index);
+    }
 
     notifyListeners();
   }
@@ -341,7 +380,7 @@ class MapProvider extends ChangeNotifier {
     _markers.clear();
     clearPolylines();
 
-    _tublesSelected = await tubles;
+    // _tublesSelected = await tubles;
     await Future.delayed(Duration(milliseconds: 100));
     
     ///Create marker point
@@ -389,7 +428,7 @@ class MapProvider extends ChangeNotifier {
 
     /// Reinitialize locations
     initLocation();
-    updateMyLocationMaker();
+    updateMyLocationMaker(false, true);
 
     notifyListeners();
   }
@@ -403,7 +442,7 @@ class MapProvider extends ChangeNotifier {
       () {
         //On Yes
         Navigator.pop(context);
-        changeCameraPosition(sourceLocation);
+        changeCameraPosition(sourceLocation, customZoom: true);
         navigate(tubles: tubles);
       }, 
       () {
@@ -412,7 +451,7 @@ class MapProvider extends ChangeNotifier {
       });
   }
 
-  //Dialog to handle if we already in destination and want to checkin
+  /// Dialog to handle if we already in destination and want to checkin
   void dialogCheckin(BuildContext context) {
     DialogUtils.showDialogChoose(
       context, 
@@ -421,7 +460,6 @@ class MapProvider extends ChangeNotifier {
       () {
         //On Yes
         Navigator.pop(context);
-        changeCameraPosition(sourceLocation);
         stopNavigate();
       }, 
       () {
@@ -430,7 +468,7 @@ class MapProvider extends ChangeNotifier {
       });
   }
 
-  ///Converting Widget to PNG
+  /// Converting Widget to PNG
   Future<Uint8List> getUint8List(GlobalKey widgetKey) async {
     RenderRepaintBoundary boundary =
     widgetKey.currentContext.findRenderObject();
@@ -439,8 +477,7 @@ class MapProvider extends ChangeNotifier {
     return byteData.buffer.asUint8List();
   }
 
-
-  ///Calculate distance between two location
+  /// Calculate distance between two location
   Future<String> calculateDistance(LatLng firstLocation, LatLng secondLocation) async {
     var p = 0.017453292519943295;
     var c = cos;
