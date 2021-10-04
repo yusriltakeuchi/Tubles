@@ -32,10 +32,8 @@ class HomeScreen extends StatelessWidget {
 */
 
 class HomeBody extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
-
     /// This is a function to initialize map view
     final mapProv = Provider.of<MapProvider>(context);
     final pageProv = Provider.of<PageProvider>(context, listen: false);
@@ -43,16 +41,14 @@ class HomeBody extends StatelessWidget {
       mapProv.initCamera(context);
     } else {
       //When map already loaded then show the item
-      if ( pageProv.bottomPosition == -200)  {
+      if (pageProv.bottomPosition == -200) {
         pageProv.updateBottomPosition(30);
       }
     }
 
-
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark
-    ));
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark));
 
     return Stack(
       children: <Widget>[
@@ -63,39 +59,39 @@ class HomeBody extends StatelessWidget {
           height: deviceHeight(context),
           color: Colors.white,
         ),
-        mapProv.cameraPosition != null ? Container(
-          width: deviceWidth(context),
-          height: deviceHeight(context),
-          child: GoogleMap(
-            myLocationButtonEnabled: false,
-            myLocationEnabled: false,
-            compassEnabled: false,
-            tiltGesturesEnabled: false,
-            markers: mapProv.markers,
-            polylines: mapProv.polylines,
-            mapType: MapType.normal,
-            initialCameraPosition: mapProv.cameraPosition,
-            onMapCreated: mapProv.onMapCreated,
-            mapToolbarEnabled: false,
-          ),
-        ) : Center(
-          child: CircularProgressIndicator(),
-        ),
-
-        mapProv.isNavigate == true 
-          ? NavigationItem() : SizedBox(),
-
-        mapProv.isNavigate == false ? TublesItems()
-          : SizedBox(),
-
+        mapProv.cameraPosition != null
+            ? Container(
+                width: deviceWidth(context),
+                height: deviceHeight(context),
+                child: GoogleMap(
+                  myLocationButtonEnabled: false,
+                  myLocationEnabled: false,
+                  compassEnabled: false,
+                  tiltGesturesEnabled: false,
+                  markers: mapProv.markers,
+                  polylines: mapProv.polylines,
+                  mapType: MapType.normal,
+                  initialCameraPosition: mapProv.cameraPosition,
+                  onMapCreated: mapProv.onMapCreated,
+                  mapToolbarEnabled: false,
+                ),
+              )
+            : Center(
+                child: CircularProgressIndicator(),
+              ),
+        mapProv.isNavigate == true ? NavigationItem() : SizedBox(),
+        mapProv.isNavigate == false ? TublesItems() : SizedBox(),
         SafeArea(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               mapProv.isNavigate == true ? _backWidget() : SizedBox(),
-              mapProv.isNavigate == false 
-                ? Expanded(child: SearchItem()) 
-                : Expanded(child: SizedBox(width: double.infinity,)),
+              mapProv.isNavigate == false
+                  ? Expanded(child: SearchItem())
+                  : Expanded(
+                      child: SizedBox(
+                      width: double.infinity,
+                    )),
               mapProv.cameraPosition != null ? _myLocationWidget() : SizedBox(),
             ],
           ),
@@ -104,13 +100,11 @@ class HomeBody extends StatelessWidget {
     );
   }
 
-
   Widget _backWidget() {
-    return Builder(
-      builder: (context) {
-        return Consumer<MapProvider>(
-          builder: (context, mapProv, _) {
-            return Padding( 
+    return Builder(builder: (context) {
+      return Consumer<MapProvider>(
+        builder: (context, mapProv, _) {
+          return Padding(
               padding: const EdgeInsets.only(top: 30, left: 20),
               child: InkWell(
                 onTap: () => mapProv.stopNavigate(),
@@ -118,42 +112,40 @@ class HomeBody extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(50)
-                  ),
-                  child: Icon(Icons.keyboard_arrow_left, color: Colors.orange, size: 35),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(50)),
+                  child: Icon(Icons.keyboard_arrow_left,
+                      color: Colors.orange, size: 35),
                 ),
-              )
-            );
-          },
-        );
-      }
-    );
+              ));
+        },
+      );
+    });
   }
 
   Widget _myLocationWidget() {
-    return Builder(
-      builder: (context) {
-        return Consumer<MapProvider>(
-          builder: (context, mapProv, _) {
-            return Padding(
-            padding: const EdgeInsets.only(top: 30, right: 20),
-            child: InkWell(
-              onTap: () => mapProv.changeCameraPosition(mapProv.sourceLocation),
-              child: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(50)
+    return Builder(builder: (context) {
+      return Consumer<MapProvider>(
+        builder: (context, mapProv, _) {
+          return Padding(
+              padding: const EdgeInsets.only(top: 30, right: 20),
+              child: InkWell(
+                onTap: () =>
+                    mapProv.changeCameraPosition(mapProv.sourceLocation),
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                      color: Colors.grey,
+                      borderRadius: BorderRadius.circular(60)),
+                  child: Icon(
+                    Icons.location_on,
+                    color: Colors.orange,
+                  ),
                 ),
-                child: Icon(Icons.location_on, color: Colors.orange,),
-              ),
-            )
-            );
-          },
-        );
-      }
-    );
-  }  
+              ));
+        },
+      );
+    });
+  }
 }
