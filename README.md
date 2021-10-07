@@ -61,3 +61,9 @@ v1.0.1
 
 v1.0.0
 - First Release
+
+## Contributors
+
+<a href="https://github.com/yusriltakeuchi/tubles/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=yusriltakeuchi/tubles" />
+</a>
