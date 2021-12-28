@@ -57,6 +57,7 @@ class HomeBody extends StatelessWidget {
             myLocationButtonEnabled: false,
             myLocationEnabled: false,
             compassEnabled: false,
+            zoomControlsEnabled: false,
             tiltGesturesEnabled: false,
             markers: mapProv.markers,
             polylines: mapProv.polylines,

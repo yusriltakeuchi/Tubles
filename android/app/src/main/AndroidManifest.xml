@@ -9,7 +9,7 @@
         android:label="Tubles"
         android:icon="@mipmap/ic_launcher">
         <meta-data android:name="com.google.android.geo.API_KEY"
-            android:value="<YOUR API KEY>"/>
+            android:value="AIzaSyCmHCtozJ9YGiV-MFwC5ZcnfscBZb52LUs"/>
         <meta-data android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
         <activity

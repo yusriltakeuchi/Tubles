@@ -83,7 +83,7 @@ class MapProvider extends ChangeNotifier {
   //- Google Maps for Android SDK
   //- Place API
   //- Directions API
-  String _googleAPIKey = "<YOUR API KEY>";
+  String _googleAPIKey = "AIzaSyCmHCtozJ9YGiV-MFwC5ZcnfscBZb52LUs";
   String get apiKey => _googleAPIKey;
 
   //Property to handle selected tubles
@@ -142,8 +142,28 @@ class MapProvider extends ChangeNotifier {
 
   //Function to get current locations
   Future<void> initLocation() async {
-    var locData = await Geolocator.getCurrentPosition();
-    _sourceLocation = LatLng(locData.latitude, locData.longitude);
+    LocationPermission permission;
+    Position? currentPos;
+
+    if (await Geolocator.isLocationServiceEnabled()) {
+      permission = await Geolocator.checkPermission();
+      if ((permission != LocationPermission.always || permission != LocationPermission.whileInUse)) {
+        permission = await Geolocator.requestPermission();
+        currentPos = Position(longitude: 0, latitude: 0, timestamp: DateTime.now(), accuracy: 0, altitude: 0, heading: 0, speed: 0, speedAccuracy: 0);
+      }
+
+      try {
+        currentPos = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.bestForNavigation,
+          timeLimit: Duration(seconds: 10)
+        );
+      } catch(e) {
+        currentPos = await Geolocator.getLastKnownPosition();
+      }
+    } else {
+      currentPos = Position(longitude: 0, latitude: 0, timestamp: DateTime.now(), accuracy: 0, altitude: 0, heading: 0, speed: 0, speedAccuracy: 0);
+    }
+    _sourceLocation = LatLng(currentPos!.latitude, currentPos.longitude);
     notifyListeners();
   }
 

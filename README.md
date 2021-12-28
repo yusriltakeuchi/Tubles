@@ -53,6 +53,8 @@ v1.0.3
 - Migrating to Null Safety
 - Change Location to Geolocator
 - Updating GoogleMapPolyline Package
+- Increase minSDKVersion to 20
+- Fix location permission issue
 
 v1.0.2
 - Adding Search Tubles
