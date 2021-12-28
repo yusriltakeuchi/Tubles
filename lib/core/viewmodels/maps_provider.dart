@@ -83,7 +83,7 @@ class MapProvider extends ChangeNotifier {
   //- Google Maps for Android SDK
   //- Place API
   //- Directions API
-  String _googleAPIKey = "AIzaSyCmHCtozJ9YGiV-MFwC5ZcnfscBZb52LUs";
+  String _googleAPIKey = "<YOUR API KEY>";
   String get apiKey => _googleAPIKey;
 
   //Property to handle selected tubles
