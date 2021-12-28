@@ -59,7 +59,7 @@ class _SearchItemState extends State<SearchItem> {
 
                 // This is the item for search result
                 mapProv.filteredTubles != null 
-                  && mapProv.filteredTubles.length > 0
+                  && mapProv.filteredTubles!.length > 0
                   ? _searchResultWidget()
                   : SizedBox()
               ],
@@ -83,11 +83,11 @@ class _SearchItemState extends State<SearchItem> {
               ),
               child: ListView.builder(
                 shrinkWrap: true,
-                itemCount: mapProv.filteredTubles.length,
+                itemCount: mapProv.filteredTubles!.length,
                 physics: BouncingScrollPhysics(),
                 itemBuilder: (context, index) {
 
-                  var _item = mapProv.filteredTubles[index];
+                  var _item = mapProv.filteredTubles![index];
                   return _searchItem(_item);
                 },
               )
@@ -129,7 +129,7 @@ class _SearchItemState extends State<SearchItem> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
                             Text(
-                              tubles.title,
+                              tubles.title!,
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold
@@ -139,7 +139,7 @@ class _SearchItemState extends State<SearchItem> {
                             ),
                             SizedBox(height: 3),
                             Text(
-                              tubles.description,
+                              tubles.description!,
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.black54

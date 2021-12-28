@@ -48,6 +48,11 @@ GMSServices.provideAPIKey("YOUR API KEY")
 ```
 
 # CHANGELOG
+v1.0.3
+- Fix Deprecated Embedding Android v2
+- Migrating to Null Safety
+- Change Location to Geolocator
+- Updating GoogleMapPolyline Package
 
 v1.0.2
 - Adding Search Tubles

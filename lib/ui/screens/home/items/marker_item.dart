@@ -35,7 +35,7 @@ class MarkerItem {
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      mapProv.tublesSelected != null ? mapProv.tublesSelected.title : "Null",
+                      mapProv.tublesSelected != null ? mapProv.tublesSelected!.title! : "Null",
                       style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
                     ),
                   ),

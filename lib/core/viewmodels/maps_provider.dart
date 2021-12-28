@@ -8,9 +8,9 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:google_map_polyline/google_map_polyline.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_map_polyline_new/google_map_polyline_new.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:location/location.dart';
 import 'package:provider/provider.dart';
 import 'package:tubles/core/config/config.dart';
 import 'package:tubles/core/models/tubles_model.dart';
@@ -29,8 +29,8 @@ class MapProvider extends ChangeNotifier {
   double get cameraZoom => _cameraZoom;
 
   //Property camera position
-  CameraPosition _cameraPosition;
-  CameraPosition get cameraPosition => _cameraPosition;
+  CameraPosition? _cameraPosition;
+  CameraPosition? get cameraPosition => _cameraPosition;
 
   //Property camera tilt
   double _cameraTilt = 0;
@@ -41,8 +41,8 @@ class MapProvider extends ChangeNotifier {
   double get cameraBearing => _cameraBearing;
 
   //Property my location data
-  LatLng _sourceLocation;
-  LatLng get sourceLocation => _sourceLocation;
+  LatLng? _sourceLocation;
+  LatLng? get sourceLocation => _sourceLocation;
 
   //Property tubles list
   List<TublesModel> _tublesList = TublesServices.getTubles();
@@ -51,16 +51,16 @@ class MapProvider extends ChangeNotifier {
   //Property tubles item filter
   //this variable will use when you activate
   //the search features
-  List<TublesModel> _filteredTubles;
-  List<TublesModel> get filteredTubles => _filteredTubles;
+  List<TublesModel>? _filteredTubles;
+  List<TublesModel>? get filteredTubles => _filteredTubles;
 
   //Property Google Map Controller completer
   Completer<GoogleMapController> _completer = Completer();
   Completer<GoogleMapController> get completer => _completer;
 
   //Property Google Map Controller
-  GoogleMapController _controller;
-  GoogleMapController get controller => _controller;
+  GoogleMapController? _controller;
+  GoogleMapController? get controller => _controller;
 
   //Property to save all markers
   Set<Marker> _markers = {};
@@ -75,8 +75,8 @@ class MapProvider extends ChangeNotifier {
   List<LatLng> get polylineCoordinates => _polylineCoordinates;
 
   // which generates every polyline between start and finish
-  GoogleMapPolyline _polylinePoints;
-  GoogleMapPolyline get polylinePoints => _polylinePoints;
+  GoogleMapPolyline? _polylinePoints;
+  GoogleMapPolyline? get polylinePoints => _polylinePoints;
 
   //Your google maps API
   //Please enable this API Features:
@@ -87,27 +87,27 @@ class MapProvider extends ChangeNotifier {
   String get apiKey => _googleAPIKey;
 
   //Property to handle selected tubles
-  TublesModel _tublesSelected;
-  TublesModel get tublesSelected => _tublesSelected;
+  TublesModel? _tublesSelected;
+  TublesModel? get tublesSelected => _tublesSelected;
 
   //Property to handle if the users navigate to tubles or not
   bool _isNavigate = false;
   bool get isNavigate => _isNavigate;
 
   //Property to mapStyle
-  String _mapStyle;
-  String get mapStyle => _mapStyle;
+  String? _mapStyle;
+  String? get mapStyle => _mapStyle;
 
   //Property polylines color
   Color _polyLineColor = Colors.amber;
 
   //Property location services
-  Location location = new Location();
-  StreamSubscription<LocationData> locationSubscription;
+  Position? location;
+  StreamSubscription<Position>? locationSubscription;
 
   //Property to save buildcontext
-  BuildContext _context;
-  BuildContext get context => _context;
+  BuildContext? _context;
+  BuildContext? get context => _context;
 
   ///Custom key for custom marker
   final markerKey = GlobalKey();
@@ -132,7 +132,7 @@ class MapProvider extends ChangeNotifier {
       zoom: cameraZoom,
       bearing: cameraBearing,
       tilt: cameraTilt,
-      target: sourceLocation
+      target: sourceLocation!
     );
 
     //Set context
@@ -141,8 +141,8 @@ class MapProvider extends ChangeNotifier {
   }
 
   //Function to get current locations
-  void initLocation() async {
-    var locData = await location.getLocation();
+  Future<void> initLocation() async {
+    var locData = await Geolocator.getCurrentPosition();
     _sourceLocation = LatLng(locData.latitude, locData.longitude);
     notifyListeners();
   }
@@ -150,9 +150,7 @@ class MapProvider extends ChangeNotifier {
   //Function to listening user location changed
   void listeningLocation() {
     //Adding location listener
-    locationSubscription = location.onLocationChanged().listen((LocationData data)
-    async {
-
+    Geolocator.getPositionStream().listen((data) {
       var locData = LatLng(data.latitude, data.longitude);
 
       /// Set current location
@@ -165,7 +163,7 @@ class MapProvider extends ChangeNotifier {
 
   //Function to stop listening location changed
   void stopListeningLocation() {
-    locationSubscription.cancel();
+    locationSubscription?.cancel();
   }
 
   /// Function to set current location
@@ -179,7 +177,7 @@ class MapProvider extends ChangeNotifier {
 
   /// Function to get distance between two locations
   void getDistance(LatLng myLocation) async {
-    _distance = await calculateDistance(myLocation, tublesSelected.location);
+    _distance = await calculateDistance(myLocation, tublesSelected!.location!);
     notifyListeners();
   }
 
@@ -187,7 +185,7 @@ class MapProvider extends ChangeNotifier {
   void changeCameraPosition(LatLng location, {bool useBearing = false, bool customZoom = false}) {
     // _controller.animateCamera(CameraUpdate.newLatLngZoom(
     //   LatLng(location.latitude, location.longitude), cameraZoom));
-    _controller.animateCamera(CameraUpdate.newCameraPosition(
+    _controller!.animateCamera(CameraUpdate.newCameraPosition(
       CameraPosition(
         target: LatLng(location.latitude, location.longitude),
         bearing: useBearing == true ? cameraBearing : 0,
@@ -208,7 +206,7 @@ class MapProvider extends ChangeNotifier {
     _controller = controller;
 
     //Set style to map
-    _controller.setMapStyle(_mapStyle);
+    _controller!.setMapStyle(_mapStyle!);
     
     setMapPins(sourceLocation, tublesList);
 
@@ -224,7 +222,7 @@ class MapProvider extends ChangeNotifier {
 
     _markers.add(Marker(
       markerId: MarkerId("sourcePin"),
-      position: sourceLocation,
+      position: sourceLocation!,
       icon: BitmapDescriptor.fromBytes(markerIcon)
     ));
 
@@ -235,7 +233,7 @@ class MapProvider extends ChangeNotifier {
   void updateMyLocationMaker(bool customZoom, bool useBearing) async {
     //Change camera position
     if (_controller != null) {
-      changeCameraPosition(sourceLocation, customZoom: customZoom, useBearing: useBearing);
+      changeCameraPosition(sourceLocation!, customZoom: customZoom, useBearing: useBearing);
     }
 
     //Remove current marker
@@ -247,7 +245,7 @@ class MapProvider extends ChangeNotifier {
     //Adding new marker
     _markers.add(Marker(
       markerId: MarkerId("sourcePin"),
-      position: sourceLocation,
+      position: sourceLocation!,
       icon: BitmapDescriptor.fromBytes(markerIcon)
     ));
 
@@ -255,14 +253,14 @@ class MapProvider extends ChangeNotifier {
   }
 
   //Function to pin my location and tubles list
-  void setMapPins(LatLng sourceLocation, List<TublesModel> destinationList) async {
+  void setMapPins(LatLng? sourceLocation, List<TublesModel> destinationList) async {
     //Set my location marker
     setMyLocationMarker();
 
     for (int i=0; i<destinationList.length; i++) {
       var data = destinationList[i];
 
-      _tublesSelected = await data;
+      _tublesSelected = data;
       await Future.delayed(Duration(milliseconds: 100));
       
       ///Create marker point
@@ -270,8 +268,8 @@ class MapProvider extends ChangeNotifier {
       notifyListeners();
       
       _markers.add(Marker(
-        markerId: MarkerId(data.title),
-        position: data.location,
+        markerId: MarkerId(data.title!),
+        position: data.location!,
         icon: BitmapDescriptor.fromBytes(markerIcon),
         
         onTap: () => setSelected(data)
@@ -285,7 +283,7 @@ class MapProvider extends ChangeNotifier {
   void searchTubles(String keyword) async {
     /// Filter search by title
     if (keyword.length > 0) {
-      _filteredTubles = tublesList.where((element) => element.title.toLowerCase().contains(keyword.toLowerCase())).toList();
+      _filteredTubles = tublesList.where((element) => element.title!.toLowerCase().contains(keyword.toLowerCase())).toList();
     } else {
       _filteredTubles = null;
     }
@@ -299,40 +297,40 @@ class MapProvider extends ChangeNotifier {
     notifyListeners();
 
     /// Set selected tubles
-    changeCameraPosition(sourceLocation, customZoom: true);
+    changeCameraPosition(sourceLocation!, customZoom: true);
     await setSelected(tubles, fromSearch: true);
 
     navigate();
   }
 
   //Function to set selected tubles
-  void setSelected(TublesModel data, {bool fromSearch = false}) async {
+  Future<void> setSelected(TublesModel data, {bool fromSearch = false}) async {
     _tublesSelected = data;
 
     //Remove previous polylines
-    await clearPolylines();
+    clearPolylines();
 
     if (fromSearch == false) {
       //Set polyline ketika klik marker
-      await setPolyLines(data.location);
+      await setPolyLines(data.location!);
     }
 
     if (fromSearch == false) {
       /// Change Pageview position
       int index = tublesList.indexOf(data);
-      Provider.of<PageProvider>(context, listen: false).navigatePageTo(index);
+      Provider.of<PageProvider>(context!, listen: false).navigatePageTo(index);
     }
 
     notifyListeners();
   }
 
   //Function to create a polylines into maps
-  void setPolyLines(LatLng destination) async {
-    List<LatLng> result;
+  Future<void> setPolyLines(LatLng destination) async {
+    List<LatLng>? result;
     try {
       _polylinePoints = GoogleMapPolyline(apiKey: apiKey);
-      result = await _polylinePoints.getCoordinatesWithLocation(
-        origin: sourceLocation,
+      result = await _polylinePoints!.getCoordinatesWithLocation(
+        origin: sourceLocation!,
         destination: destination,
         mode: RouteMode.driving
       );
@@ -341,7 +339,7 @@ class MapProvider extends ChangeNotifier {
       print("ERROR GAN: " + e.toString());
     }
 
-    if (result.isNotEmpty) {
+    if (result != null && result.isNotEmpty) {
       result.forEach((LatLng point) {
         _polylineCoordinates.add(
           LatLng(point.latitude, point.longitude)
@@ -371,7 +369,7 @@ class MapProvider extends ChangeNotifier {
   }
 
   //Function to navigate into tubles destination
-  void navigate({TublesModel tubles}) async {
+  void navigate({TublesModel? tubles}) async {
     if (tubles != null) {
       await setSelected(tubles);
     }
@@ -389,8 +387,8 @@ class MapProvider extends ChangeNotifier {
 
     //Adding new marker destination
     _markers.add(Marker(
-      markerId: MarkerId(tublesSelected.title),
-      position: tublesSelected.location,
+      markerId: MarkerId(tublesSelected!.title!),
+      position: tublesSelected!.location!,
       icon: BitmapDescriptor.fromBytes(markerIcon),
     ));
 
@@ -398,13 +396,13 @@ class MapProvider extends ChangeNotifier {
     setMyLocationMarker();
 
     //Set polylines to marker
-    setPolyLines(tublesSelected.location);
+    setPolyLines(tublesSelected!.location!);
     
     //set navigate status
     _isNavigate = true;
 
     /// Get Distance between two locations
-    getDistance(sourceLocation);
+    getDistance(sourceLocation!);
 
     //Enable location listener
     listeningLocation();
@@ -424,7 +422,7 @@ class MapProvider extends ChangeNotifier {
     stopListeningLocation();
 
     /// Reset page item
-    Provider.of<PageProvider>(context, listen: false).resetPageView();
+    Provider.of<PageProvider>(context!, listen: false).resetPageView();
 
     /// Reinitialize locations
     initLocation();
@@ -442,7 +440,7 @@ class MapProvider extends ChangeNotifier {
       () {
         //On Yes
         Navigator.pop(context);
-        changeCameraPosition(sourceLocation, customZoom: true);
+        changeCameraPosition(sourceLocation!, customZoom: true);
         navigate(tubles: tubles);
       }, 
       () {
@@ -471,10 +469,10 @@ class MapProvider extends ChangeNotifier {
   /// Converting Widget to PNG
   Future<Uint8List> getUint8List(GlobalKey widgetKey) async {
     RenderRepaintBoundary boundary =
-    widgetKey.currentContext.findRenderObject();
+    widgetKey.currentContext?.findRenderObject() as RenderRepaintBoundary;
     var image = await boundary.toImage(pixelRatio: 2.0);
-    ByteData byteData = await image.toByteData(format: ImageByteFormat.png);
-    return byteData.buffer.asUint8List();
+    ByteData? byteData = await image.toByteData(format: ImageByteFormat.png);
+    return byteData!.buffer.asUint8List();
   }
 
   /// Calculate distance between two location

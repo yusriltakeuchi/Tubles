@@ -9,12 +9,12 @@ class PageProvider extends ChangeNotifier {
   //------------------------//
 
   /// Pageview Controller
-  PageController _pageController;
-  PageController get pageController => _pageController;
+  PageController? _pageController;
+  PageController? get pageController => _pageController;
 
   /// Page number
-  double _page = 0;
-  double get page => _page;
+  double? _page = 0;
+  double? get page => _page;
 
   /// Current page number
   int _currentPage = 0;
@@ -38,7 +38,8 @@ class PageProvider extends ChangeNotifier {
 
   /// Function to initialize page controller
   void initController() async {
-    _pageController = await PageController(
+    await Future.delayed(Duration(milliseconds: 100));
+    _pageController = PageController(
       initialPage: currentPage,
       viewportFraction: viewPortFraction
     );
@@ -47,7 +48,7 @@ class PageProvider extends ChangeNotifier {
 
   /// Function to change page position to controller
   void changePagePosition() async {
-    _page = pageController.page;
+    _page = pageController!.page;
     notifyListeners();
   }
 
@@ -55,14 +56,14 @@ class PageProvider extends ChangeNotifier {
   void changeCurrentPage(int position, BuildContext context) {
     _currentPage = position;
     final mapProv = Provider.of<MapProvider>(context, listen: false);
-    mapProv.changeCameraPosition(mapProv.tublesList[position].location, useBearing: true);
+    mapProv.changeCameraPosition(mapProv.tublesList[position].location!, useBearing: true);
     mapProv.setSelected(mapProv.tublesList[position]);
     notifyListeners();
   }
 
   /// Function to change current page location
   void navigatePageTo(int position) {
-    _pageController.jumpToPage(position);
+    _pageController!.jumpToPage(position);
     notifyListeners();
   }
 
@@ -76,7 +77,8 @@ class PageProvider extends ChangeNotifier {
 
   /// Function to update bottom Position
   void updateBottomPosition(double position) async {
-    _bottomPosition = await position;
+    await Future.delayed(Duration(milliseconds: 100));
+    _bottomPosition = position;
     notifyListeners();
   }
 

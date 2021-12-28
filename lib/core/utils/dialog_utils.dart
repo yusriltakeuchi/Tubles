@@ -3,7 +3,7 @@ import 'package:tubles/ui/widgets/dialog_choose.dart';
 
 class DialogUtils {
 
-  static void showDialogChoose(BuildContext context, String title, String message, Function clickYes, Function clickNo) {
+  static void showDialogChoose(BuildContext context, String title, String message, Function? clickYes, Function? clickNo) {
     showGeneralDialog(
       barrierColor: Colors.black.withOpacity(0.5),
       transitionBuilder: (context, a1, a2, widget) {
@@ -14,8 +14,8 @@ class DialogUtils {
             child: DialogChoose(
               title: title,
               message: message,
-              onClickNo: () => clickNo(),
-              onClickYes: () => clickYes(),
+              onClickNo: () => clickNo!(),
+              onClickYes: () => clickYes!(),
             )
           ),
         );
@@ -24,6 +24,8 @@ class DialogUtils {
       barrierDismissible: false,
       barrierLabel: '',
       context: context,
-      pageBuilder: (context, animation1, animation2) {});
+      pageBuilder: (context, animation1, animation2) {
+        return Container();
+      });
   }
 }

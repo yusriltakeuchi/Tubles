@@ -66,7 +66,7 @@ class NavigationItem extends StatelessWidget {
                             ),
                             SizedBox(height: 5),
                             Text(
-                              "Perjalanan menuju ${mapProv.tublesSelected.title} sedang dalam proses",
+                              "Perjalanan menuju ${mapProv.tublesSelected!.title} sedang dalam proses",
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Colors.black54

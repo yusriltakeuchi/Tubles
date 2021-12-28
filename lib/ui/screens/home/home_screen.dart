@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:tubles/core/config/config.dart';
-import 'package:tubles/core/models/tubles_model.dart';
 import 'package:tubles/core/viewmodels/maps_provider.dart';
 import 'package:tubles/core/viewmodels/page_provider.dart';
 import 'package:tubles/ui/constant/constant.dart';
@@ -11,7 +9,6 @@ import 'package:tubles/ui/screens/home/items/marker_item.dart';
 import 'package:tubles/ui/screens/home/items/navigation_item.dart';
 import 'package:tubles/ui/screens/home/items/search_item.dart';
 import 'package:tubles/ui/screens/home/items/tubles_items.dart';
-import 'package:tubles/ui/widgets/clip_triangle.dart';
 
 class HomeScreen extends StatelessWidget {
   @override
@@ -21,15 +18,6 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-
-/*
-  Name: Tubles 
-  Version: 1.1
-  Author: Yusril Rapsanjani
-  Website: leeyurani.com
-  Description: Tubles is a simple applications to provide any tubles in
-    in google maps and we as the user can navigate into the selected tubles location.
-*/
 
 class HomeBody extends StatelessWidget {
 
@@ -47,7 +35,6 @@ class HomeBody extends StatelessWidget {
         pageProv.updateBottomPosition(30);
       }
     }
-
 
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -74,7 +61,7 @@ class HomeBody extends StatelessWidget {
             markers: mapProv.markers,
             polylines: mapProv.polylines,
             mapType: MapType.normal,
-            initialCameraPosition: mapProv.cameraPosition,
+            initialCameraPosition: mapProv.cameraPosition!,
             onMapCreated: mapProv.onMapCreated,
             mapToolbarEnabled: false,
           ),
@@ -139,7 +126,7 @@ class HomeBody extends StatelessWidget {
             return Padding(
             padding: const EdgeInsets.only(top: 30, right: 20),
             child: InkWell(
-              onTap: () => mapProv.changeCameraPosition(mapProv.sourceLocation),
+              onTap: () => mapProv.changeCameraPosition(mapProv.sourceLocation!),
               child: Container(
                 width: 40,
                 height: 40,

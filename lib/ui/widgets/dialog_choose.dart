@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 class DialogChoose extends StatelessWidget {
-  String title;
-  String message;
-  BuildContext context;
-  Function onClickYes;
-  Function onClickNo;
+  final String? title;
+  final String? message;
+  final BuildContext? context;
+  final Function? onClickYes;
+  final Function? onClickNo;
 
   DialogChoose({
     this.title,
@@ -22,7 +22,7 @@ class DialogChoose extends StatelessWidget {
         borderRadius: BorderRadius.circular(10)
       ),
       title: Text(
-        title,
+        title!,
         style: TextStyle(
           fontWeight: FontWeight.bold
         ),
@@ -34,7 +34,7 @@ class DialogChoose extends StatelessWidget {
           children: <Widget>[
             
             Text(
-              message,
+              message!,
               style: TextStyle(
                 fontSize: 16,
               ),
@@ -43,18 +43,18 @@ class DialogChoose extends StatelessWidget {
         )
       ),
       actions: <Widget>[
-        FlatButton(
-          onPressed: () => onClickYes(),
+        TextButton(
           child: Text(
             "YA",
           ),
+          onPressed: () => onClickYes!(), 
         ),
-        FlatButton(
-          onPressed: () => onClickNo(),
+        TextButton(
           child: Text(
             "TIDAK",
           ),
-        ),
+          onPressed: () => onClickNo!(), 
+        )
       ],
     );
   }

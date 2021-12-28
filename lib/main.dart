@@ -22,8 +22,7 @@ class MyApp extends StatelessWidget {
         title: "Tubles",
         theme: ThemeData(
           fontFamily: 'Proxima-Regular',
-          accentColor: Colors.orange,
-          primaryColor: Colors.orange
+          primaryColor: Colors.orange, colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Colors.orange)
         ),
         debugShowCheckedModeBanner: false,
         home: HomeScreen(),

@@ -39,19 +39,20 @@ class _TublesItemsState extends State<TublesItems> {
                 child: Container(
                   height: pageProv.pageHeight,
                   child: NotificationListener<ScrollNotification>(
-                    onNotification: (ScrollNotification notification) {
+                    onNotification: (ScrollNotification? notification) {
                       if (notification is ScrollUpdateNotification) {
                         pageProv.changePagePosition();
                       }
+                      return true;
                     },
                     child: PageView.builder(
                       onPageChanged: (pos) => pageProv.changeCurrentPage(pos, context),
                       physics: BouncingScrollPhysics(),
-                      controller: pageProv.pageController,
+                      controller: pageProv.pageController!,
                       itemCount: mapProv.tublesList.length,
                       itemBuilder: (context, index) {
                         
-                        final scale = max(pageProv.scaleFraction, (pageProv.fullScale - (index - pageProv.page).abs()) + pageProv.viewPortFraction);
+                        final scale = max(pageProv.scaleFraction, (pageProv.fullScale - (index - pageProv.page!).abs()) + pageProv.viewPortFraction);
                         var tubles = mapProv.tublesList[index];
                         
                         return _tublesChild(scale, tubles, index);
@@ -105,7 +106,7 @@ class _TublesItemsState extends State<TublesItems> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
                                   Text(
-                                    tubles.title,
+                                    tubles.title!,
                                     style: TextStyle(
                                       fontSize: 17,
                                       fontWeight: FontWeight.bold
@@ -115,7 +116,7 @@ class _TublesItemsState extends State<TublesItems> {
                                   ),
                                   SizedBox(height: 5),
                                   Text(
-                                    tubles.description,
+                                    tubles.description!,
                                     style: TextStyle(
                                       fontSize: 14,
                                       color: Colors.black54
